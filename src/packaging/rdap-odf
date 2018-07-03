@@ -1,0 +1,9 @@
+#!/bin/bash
+
+if [ -e /app/rdap-odf/rdap-odf-1.0.jar ]
+then
+    cd /app/rdap-odf
+    java -jar rdap-odf-1.0.jar
+else
+    echo "failed to execute rdap-odf"
+fi

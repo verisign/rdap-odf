@@ -1,0 +1,18 @@
+domain abc.cc --output testResult.txt
+domains --name ab*.cc --output testResult.txt
+domains --nsname k4* --output testResult.txt
+domains --nsip 69.* --output testResult.txt
+nameserver k4.nstld.com --output testResult.txt
+nameservers --name k4* --output testResult.txt
+nameservers --ip 69* --output testResult.txt 
+entity 50000101-vrsn --output testResult.txt
+entities --fullname t*-vrsn --output testResult.txt
+entities --handle 5000*-vrsn --output testResult.txt
+
+domain abc.cc --type unauth --output testResult.txt
+domains --name ab*.cc --type unauth --output testResult.txt
+domains --nsname k4* --type unauth --output testResult.txt
+domains --nsip 69.* --type unauth --output testResult.txt
+nameserver k4.nstld.com --type unauth --output testResult.txt
+nameservers --name k4* --type unauth --output testResult.txt
+nameservers --ip 69* --type unauth --output testResult.txt
