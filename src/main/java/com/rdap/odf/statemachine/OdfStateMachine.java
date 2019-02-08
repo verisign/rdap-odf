@@ -34,6 +34,7 @@ import com.rdap.odf.oauthhandler.GoogleHandler;
 import com.rdap.odf.shell.Constants;
 import com.rdap.odf.utils.NetUtils;
 import com.rdap.odf.utils.Utils;
+import java.util.concurrent.TimeUnit;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -156,7 +157,11 @@ public class OdfStateMachine {
         if (currentState.getState() == State.PENDING || currentState.getState() == State.INIT) {
             return "authentication is already in process or is not supported at this time. abort";
         }
-        stateTransit(State.PENDING);
+
+        if(!this.waitForAuth()) {
+            return "Authorization request timed out";
+        }
+
         return "";
     }
 
@@ -273,12 +278,12 @@ public class OdfStateMachine {
         } else {
             if (isAuth) {
                 if (currentState.getState() == State.UNAUTHED) {
-                    stateTransit(State.PENDING);
-                    stateAuthed.setCachedQuery(query);
-                    stateAuthed.setCachedQueryPretty(isPretty);
-                    stateAuthed.setCachedOutputFile(output);
-                    return "";
-                } else if (currentState.getState() == State.AUTHED) {
+                    if(!this.waitForAuth()) {
+                        return "Unable to complete the query, authorization request timed out";
+                    }
+                }
+
+                if (currentState.getState() == State.AUTHED) {
                     LOG.log(Level.INFO, "make query: " + query);
                     String resp = netUtils.sendRdapQuery(
                             Utils.getAuthRDAPUrl(query, clientDataMgr.getIdToken()),
@@ -289,7 +294,6 @@ public class OdfStateMachine {
                     if (!output.equals(Constants.QUERY_OUTPUT_FILE_DEFAULT)) {
                         Utils.saveRdapResponse(query, resp, output);
                     }
-
                     return resp;
                 } else {
                     return "RDAP query is not supported in state " + getCurrentStateStr();
@@ -307,5 +311,24 @@ public class OdfStateMachine {
                 return resp;
             }
         }
+    }
+
+    private boolean waitForAuth() {
+        stateTransit(State.PENDING);
+
+        while (currentState.getState() != State.AUTHED) {
+            // If the authorization times out by the OAuth Timeout
+            if(currentState.getState() == State.UNAUTHED) {
+                LOG.log(Level.WARNING, "ERROR: Query timed out waiting for authorization");
+                return false;
+            }
+            try {
+                TimeUnit.SECONDS.sleep(1);
+            } catch (InterruptedException e) {
+                LOG.log(Level.WARNING, "Query Authentication Interrupted!");
+                return false;
+            }
+        }
+        return true;
     }
 }

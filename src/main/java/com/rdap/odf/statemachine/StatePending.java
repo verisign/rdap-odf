@@ -29,6 +29,7 @@
 
 package com.rdap.odf.statemachine;
 
+import java.time.LocalDateTime;
 import org.json.simple.JSONObject;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -81,6 +82,7 @@ public class StatePending extends StateBase {
 
         System.out.println("Please visit \033[1;33m" + verificationUrl + "\033[0m on your second device " +
                 "and authorize with code \033[1;33m" + userCode + "\033[0m");
+        System.out.println("This authorization request will expire at " + LocalDateTime.now().plusSeconds(expiresIn));
     }
 
     public void exit() {
@@ -123,5 +125,4 @@ public class StatePending extends StateBase {
             }
         }, pollDelaySec * 1000, interval * 1000); // poll after delay for a short time
     }
-
 }

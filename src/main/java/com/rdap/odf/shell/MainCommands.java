@@ -107,7 +107,7 @@ public class MainCommands {
     public class CustomPromptProvider implements PromptProvider {
         public AttributedString getPrompt() {
             AttributedStringBuilder prompBuilder = new AttributedStringBuilder();
-            prompBuilder.append("\033[33m");
+            prompBuilder.append("\n\r\033[33m");
             prompBuilder.append(odfStateMachine.getCurrentStateStr() + "> ", AttributedStyle.BOLD);
             prompBuilder.append("\033[0m");
             return prompBuilder.toAttributedString();
